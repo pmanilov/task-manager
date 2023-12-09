@@ -20,8 +20,12 @@ public class TaskService {
     private final UserService userService;
 
 
-    public TaskDto createTask(TaskDto taskDto) {
-        taskRepository.save(this.convertTaskDtotoTask(taskDto));
+    public TaskDto createTask(TaskDto taskDto) throws AccessDeniedException {
+        if(taskDto.getAuthor().equals(userService.getAuthorizedUser().getId())) {
+            taskRepository.save(this.convertTaskDtotoTask(taskDto));
+        } else {
+            throw new AccessDeniedException("You don't have permission to delete this task");
+        }
         return taskDto;
     }
 
@@ -61,13 +65,13 @@ public class TaskService {
         }
     }
 
-    public List<Task> getTasksByAuthor(Long authorId) {
-        return taskRepository.findAllByAuthorId(authorId);
+    public List<TaskDto> getTasksByAuthor(Long authorId) {
+        return taskRepository.findAllByAuthorId(authorId).stream().map(this::convertTasktoTaskDto).collect(Collectors.toList());
     }
 
-    public List<Task> getTasksByExecutor(Long executorId) {
+    public List<TaskDto> getTasksByExecutor(Long executorId) {
         User executor = userService.getUserById(executorId);
-        return taskRepository.findAllByExecutors(executor);
+        return taskRepository.findAllByExecutors(executor).stream().map(this::convertTasktoTaskDto).collect(Collectors.toList());
     }
 
     public TaskDto getTaskById(Long taskId) {

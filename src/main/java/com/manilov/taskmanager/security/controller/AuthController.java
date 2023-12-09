@@ -1,11 +1,17 @@
 package com.manilov.taskmanager.security.controller;
 
+import com.manilov.taskmanager.dto.UserDto;
 import com.manilov.taskmanager.model.User;
 import com.manilov.taskmanager.security.JwtHelper;
 import com.manilov.taskmanager.security.model.JwtRequest;
 import com.manilov.taskmanager.security.model.JwtResponse;
 import com.manilov.taskmanager.security.service.CustomUserDetailsService;
 import com.manilov.taskmanager.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,7 +35,10 @@ public class AuthController {
 
 
 
-    //get JWT token
+    @Operation(summary = "Login to get JWT token", description = "Authenticate user and generate JWT token.")
+    @ApiResponse(responseCode = "200", description = "Successfully authenticated and JWT token generated",
+            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                    schema = @Schema(implementation = JwtResponse.class)))
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest request){
         this.doAuthenticate(request.getEmail(), request.getPassword());
@@ -56,8 +65,17 @@ public class AuthController {
         return "Credentials Invalid !!";
     }
 
+    @Operation(summary = "Create a new user", description = "Registers a new user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User created successfully",
+                    content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "400", description = "User with this email already exists",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(type = "string")))
+    })
     @PostMapping("/registration")
-    public ResponseEntity<User> createUser(@RequestBody @Valid User user){
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid User user){
         return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
     }
 

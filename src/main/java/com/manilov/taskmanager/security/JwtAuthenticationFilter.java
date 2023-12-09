@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("Token check");
+        log.info("Token checking");
         String requestHeader = request.getHeader("Authorization");
         String username = null;
         String token = null;
@@ -37,24 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = this.jwtHelper.getUsernameFromToken(token);
             } catch (IllegalArgumentException e) {
-                log.info("Illegal Argument while fetching the username !!");
+                log.error("Illegal Argument while fetching the username!!!");
                 e.printStackTrace();
             } catch (ExpiredJwtException e) {
-                log.info("Given jwt token is expired !!");
+                log.error("Given jwt token is expired!!!");
                 e.printStackTrace();
             } catch (MalformedJwtException e) {
-                log.info("Some changed has done in token !! Invalid Token");
-                e.printStackTrace();
-            } catch (Exception e) {
+                log.error("Some changed has done in token !! Invalid Token");
                 e.printStackTrace();
             }
-
         } else {
-            log.info("Invalid Header Value !! ");
+            log.warn("Invalid Header Value!!!");
         }
-
-
-        //
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //fetch user detail from username
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -66,11 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } else {
-                log.info("Validation fails !!");
+                log.warn("Validation fails!!!");
             }
         }
-
         filterChain.doFilter(request, response);
-
     }
 }

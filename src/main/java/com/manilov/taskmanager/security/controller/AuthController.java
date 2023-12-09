@@ -57,8 +57,8 @@ public class AuthController {
     }
 
     @PostMapping("/registration")
-    public User createUser(@RequestBody @Valid User user){
-        return userService.createUser(user);
+    public ResponseEntity<User> createUser(@RequestBody @Valid User user){
+        return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

@@ -3,7 +3,9 @@ package com.manilov.taskmanager.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,5 +43,8 @@ public class Task {
             inverseJoinColumns = @JoinColumn(name = "executor_id")
     )
     private Set<User> executors = new HashSet<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
 }

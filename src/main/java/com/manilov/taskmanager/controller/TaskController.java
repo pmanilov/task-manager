@@ -1,8 +1,9 @@
 package com.manilov.taskmanager.controller;
 
+import com.manilov.taskmanager.dto.CommentDto;
 import com.manilov.taskmanager.dto.TaskDto;
+import com.manilov.taskmanager.model.Status;
 import com.manilov.taskmanager.service.TaskService;
-import com.manilov.taskmanager.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +22,6 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final UserService userService;
 
     @Operation(summary = "Create a new task", description = "Creates a new task and returns the created task.")
     @ApiResponse(responseCode = "201", description = "Task created successfully",
@@ -39,6 +39,15 @@ public class TaskController {
     @PostMapping("/update/{taskId}")
     public ResponseEntity<TaskDto> updateTask(@PathVariable Long taskId, @RequestBody TaskDto taskDto) throws AccessDeniedException {
         return new ResponseEntity<>(taskService.updateTask(taskId, taskDto), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Change status of a task", description = "Change status of a task and returns the updated task.")
+    @ApiResponse(responseCode = "200", description = "Status updated successfully",
+            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TaskDto.class)))
+    @PostMapping("/change-status/{taskId}")
+    public ResponseEntity<TaskDto> changeStatus(@PathVariable Long taskId, @RequestBody Status status) throws AccessDeniedException {
+        return new ResponseEntity<>(taskService.changeStatus(taskId, status), HttpStatus.OK);
     }
 
     @Operation(summary = "Delete a task by ID", description = "Deletes a task by ID.")
@@ -62,17 +71,26 @@ public class TaskController {
     @ApiResponse(responseCode = "200", description = "Executable tasks retrieved successfully",
             content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
                     schema = @Schema(implementation = TaskDto.class)))
-    @GetMapping("/executable")
-    public ResponseEntity<List<TaskDto>> getExecutableTasks() {
-        return new ResponseEntity<>(taskService.getTasksByExecutor(userService.getAuthorizedUser().getId()), HttpStatus.OK);
+    @GetMapping("/executable/{userId}")
+    public ResponseEntity<List<TaskDto>> getExecutableTasks(@PathVariable Long userId) {
+        return new ResponseEntity<>(taskService.getTasksByExecutor(userId), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get tasks created by the authenticated user", description = "Gets tasks created by the authenticated user.")
+    @Operation(summary = "Get tasks created by user", description = "Gets tasks created by user.")
     @ApiResponse(responseCode = "200", description = "Created tasks retrieved successfully",
             content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
                     schema = @Schema(implementation = TaskDto.class)))
-    @GetMapping("/created")
-    public ResponseEntity<List<TaskDto>> getCreatedTasks() {
-        return new ResponseEntity<>(taskService.getTasksByAuthor(userService.getAuthorizedUser().getId()), HttpStatus.OK);
+    @GetMapping("/created/{userId}")
+    public ResponseEntity<List<TaskDto>> getCreatedTasks(@PathVariable Long userId) {
+        return new ResponseEntity<>(taskService.getTasksByAuthor(userId), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Add comment to task", description = "Add comment to task and return comment")
+    @ApiResponse(responseCode = "200", description = "Adding comment successfully",
+            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                    schema = @Schema(implementation = CommentDto.class)))
+    @PostMapping("/{taskId}/add-comment")
+    public ResponseEntity<CommentDto> addComment(@PathVariable Long taskId, @RequestBody String text) {
+        return new ResponseEntity<>(taskService.addComment(taskId, text), HttpStatus.OK);
     }
 }

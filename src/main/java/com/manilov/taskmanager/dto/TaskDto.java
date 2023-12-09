@@ -4,6 +4,7 @@ import com.manilov.taskmanager.model.Priority;
 import com.manilov.taskmanager.model.Status;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,4 +19,5 @@ public class TaskDto {
     private Priority priority;
     private Long author;
     private Set<Long> executors;
+    private List<CommentDto> comments;
 }

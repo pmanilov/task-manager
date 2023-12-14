@@ -14,5 +14,5 @@ RUN addgroup --gid "$GID" "$USER" \
 USER ${USER}
 WORKDIR /app
 COPY --chown=$USER:$USER build/libs/task-manager-1.0.jar /task-manager-1.0.jar
-EXPOSE 8000
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/task-manager-1.0.jar"]
